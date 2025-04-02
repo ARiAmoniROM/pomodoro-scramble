@@ -1,0 +1,143 @@
+body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* 垂直方向の中央揃え */
+    min-height: 100vh; /* 画面の高さいっぱいにする */
+    margin: 0;
+    background-color: white;
+    color: black;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-mode {
+    background-color: black;
+    color: white;
+}
+
+#currentTimer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.label-row {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* ボタンを中央揃え */
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.toggle-button {
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    margin: 0 10px;
+    position: relative;
+    outline: none;
+}
+
+.toggle-slider {
+    width: 18px;
+    height: 18px;
+    background-color: white;
+    border-radius: 9px;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.toggle-button.rest-mode .toggle-slider {
+    transform: translateX(20px);
+}
+
+.timer-label {
+    font-size: 2em;
+    color: #555;
+    text-align: center;
+    min-width: 80px; /* 幅を調整 */
+    cursor: pointer; /* ホバー時にポインターを表示 */
+    font-weight: normal; /* デフォルトは通常 */
+}
+
+.timer-label.active {
+    font-weight: bold;
+    color: black;
+}
+
+body.dark-mode .timer-label.active {
+    color: white;
+}
+
+.timer-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+#workTimeDisplay,
+#restTimeDisplay {
+    font-size: 8em;
+    color: black;
+    min-width: 200px;
+    text-align: center;
+}
+
+body.dark-mode #workTimeDisplay,
+body.dark-mode #restTimeDisplay {
+    color: white;
+}
+
+#currentPomodoroCount {
+    font-size: 8em;
+    cursor: pointer;
+    padding: 0 0.5em;
+}
+
+#totalTimeDisplay {
+    font-size: 3em;
+    color: gray;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#historyContainer {
+    margin-top: 40px;
+    text-align: center;
+}
+
+#historyContainer div {
+    font-size: 1.5em;
+    color: #555;
+    margin-bottom: 5px;
+    user-select: text;
+}
+
+body.dark-mode #historyContainer div {
+    color: #aaa;
+}
+
+#longPressIndicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    user-select: none;
+    text-align: center;
+    line-height: 1;
+    font-size: 7em;
+    pointer-events: none;
+}
+
+#longPressIndicator.show {
+    opacity: 1;
+}
