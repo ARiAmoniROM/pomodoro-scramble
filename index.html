@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>pomodoro-scramble</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="feedbackIcon" class="hidden"></div>
+    <div id="longPressIndicator" class="hidden">
+    </div>
+    <div id="currentTimer">
+        <div class="label-row">
+            <div class="timer-label work-label active" id="workLabel">work</div>
+            <button id="modeToggleButton" class="toggle-button">
+                <div class="toggle-slider"></div>
+            </button>
+            <div class="timer-label rest-label" id="restLabel">rest</div>
+        </div>
+        <div class="timer-row">
+            <div id="workTimeDisplay">00:00</div>
+            <div id="currentPomodoroCount" tabindex="0" style="cursor: pointer;"></div>
+            <div id="restTimeDisplay">00:00</div>
+        </div>
+        <div id="totalTimeDisplay">00:00 0️⃣ 00:00</div>
+    </div>
+    <div id="historyContainer">
+        <div></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
