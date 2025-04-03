@@ -31,9 +31,9 @@ const formatTime = ms => new Date(ms).toISOString().slice(14, 19);
 const getModeIcon = (iconType) => {
     switch (iconType) {
         case 'work':
-            return '🔥';
+            return '🍅';
         case 'rest':
-            return '☕️';
+            return '🫠';
         case 'play':
             return '▶️';
         case 'pause':
