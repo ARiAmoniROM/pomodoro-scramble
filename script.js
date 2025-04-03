@@ -21,11 +21,32 @@ let isWorkTime = true; // true: 作業時間, false: 休憩時間
 let pomodoroCount = 0;
 let history = [];
 let firstStart = true; // 最初のタイマー開始を判定するフラグ
+let isFinished = false; // おつかれさま処理が完了したかどうかを示すフラグ
 const POMODORO_EMOJIS = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
 const MAX_POMODORO = 10; // ポモドーロ数の上限
 const PROGRESS_BAR_LENGTH = 10;
 
 const formatTime = ms => new Date(ms).toISOString().slice(14, 19);
+
+const getModeIcon = (iconType) => {
+    switch (iconType) {
+        case 'work':
+            return '🔥';
+        case 'rest':
+            return '☕️';
+        case 'play':
+            return '▶️';
+        case 'pause':
+            return '⏸️';
+        case 'loading':
+            return '🔄';
+        case 'next':
+            return '⏭';
+        default:
+            return ''; // デフォルトは空文字
+    }
+};
+
 const updateDisplay = () => {
     const now = Date.now();
     const elapsed = now - startTime;
@@ -33,9 +54,9 @@ const updateDisplay = () => {
     totalSeparator = POMODORO_EMOJIS[pomodoroCount] || ""; // ポモドーロ数は休憩後の作業開始時に更新
 
     if (!isTimerRunning) {
-        currentSeparator = '⏸️';
+        currentSeparator = getModeIcon('pause'); // 関数を使用
     } else {
-        currentSeparator = isWorkTime ? '🔥' : '☕️';
+        currentSeparator = isWorkTime ? getModeIcon('work') : getModeIcon('rest'); // 関数を使用
     }
 
     if (isWorkTime && isTimerRunning) {
@@ -48,12 +69,12 @@ const updateDisplay = () => {
 
     workTimeDisplay.textContent = formatTime(workTime);
     restTimeDisplay.textContent = formatTime(restTime);
-    currentPomodoroCount.textContent = currentSeparator;
+    currentPomodoroCount.textContent = isFinished ? getModeIcon('next') : currentSeparator; // 完了後は ⏭ を表示
     totalTimeDisplay.textContent = `${formatTime(totalWorkTime)} ${totalSeparator} ${formatTime(totalRestTime)}`;
     startTime = now;
 };
 const startTimer = () => {
-    if (!isTimerRunning) {
+    if (!isTimerRunning && !isFinished) {
         startTime = Date.now();
         intervalId = setInterval(updateDisplay, 1000);
         isTimerRunning = true;
@@ -72,31 +93,37 @@ const stopTimer = () => {
         updateDisplay();
     }
 };
-const toggleTimer = () => isTimerRunning ? stopTimer() : startTimer();
+const toggleTimer = () => {
+    if (!isFinished) {
+        isTimerRunning ? stopTimer() : startTimer();
+    }
+};
 const toggleMode = (manual = true) => {
-    if (manual) {
-        currentPomodoroCount.textContent = '🔄'; // モード切り替え開始時に 🔄 を表示
+    if (manual && !isFinished) {
+        currentPomodoroCount.textContent = getModeIcon('loading'); // 関数を使用
         setTimeout(() => {
             if (isWorkTime) { // 作業から休憩に移る時
                 if (pomodoroCount === MAX_POMODORO) {
                     stopTimer();
-                    alert("Good job!"); // ポップアップ表示
+                    alert("Well done."); // ポップアップ表示 (より穏やかな表現に変更)
+                    isFinished = true; // 完了フラグを立てる
+                    currentPomodoroCount.textContent = getModeIcon('next'); // 関数を使用
                 }
-                history.push({ work: formatTime(workTime), rest: formatTime(restTime), count: POMODORO_EMOJIS[pomodoroCount] || "" });
-                renderHistory();
-                workTime = 0;
-                restTime = 0;
             } else { // 休憩から作業に戻る時
                 if (pomodoroCount < MAX_POMODORO) {
+                    history.push({ work: formatTime(workTime), rest: formatTime(restTime), count: POMODORO_EMOJIS[pomodoroCount] || "" });
+                    renderHistory();
+                    workTime = 0;
+                    restTime = 0;
                     pomodoroCount++;
                     updateTotalSeparator();
                 }
             }
             isWorkTime = !isWorkTime;
             updateToggleButtonState();
-            currentPomodoroCount.textContent = isWorkTime ? '🔥' : '☕️';
+            currentPomodoroCount.textContent = isFinished ? getModeIcon('next') : (isWorkTime ? getModeIcon('work') : getModeIcon('rest')); // 関数を使用
             if (!isTimerRunning) {
-                currentPomodoroCount.textContent = '⏸️';
+                currentPomodoroCount.textContent = isFinished ? getModeIcon('next') : getModeIcon('pause'); // 関数を使用
             }
         }, 1000);
         startTimer(); // モード切り替え時に自動で開始
@@ -120,22 +147,31 @@ const resetAll = () => {
     history = [];
     isWorkTime = true;
     firstStart = true;
+    isFinished = false; // リセット時に完了フラグを戻す
     updateToggleButtonState();
     updateDisplay();
     renderHistory();
     updateTotalSeparator();
-    currentPomodoroCount.textContent = '▶️';
+    currentPomodoroCount.textContent = getModeIcon('play');
 };
 
 const updateToggleButtonState = () => {
-    if (isWorkTime) {
-        modeToggleButton.classList.remove('rest-mode');
-        workLabel.classList.add('active');
-        restLabel.classList.remove('active');
+    if (!isFinished) {
+        if (isWorkTime) {
+            modeToggleButton.classList.remove('rest-mode');
+            workLabel.classList.add('active');
+            restLabel.classList.remove('active');
+        } else {
+            modeToggleButton.classList.add('rest-mode');
+            workLabel.classList.remove('active');
+            restLabel.classList.add('active');
+        }
     } else {
-        modeToggleButton.classList.add('rest-mode');
+        modeToggleButton.classList.add('disabled'); // 完了後はトグルボタンを操作不可にするCSSクラスを追加
         workLabel.classList.remove('active');
-        restLabel.classList.add('active');
+        restLabel.classList.remove('active');
+        workLabel.classList.add('disabled'); // ラベルも操作不可にするCSSクラスを追加
+        restLabel.classList.add('disabled'); // ラベルも操作不可にするCSSクラスを追加
     }
 };
 
@@ -150,14 +186,14 @@ modeToggleButton.addEventListener('click', () => {
 });
 
 workLabel.addEventListener('click', () => {
-    if (!isWorkTime) {
+    if (!isWorkTime && !isFinished) {
         stopTimer();
         toggleMode();
     }
 });
 
 restLabel.addEventListener('click', () => {
-    if (isWorkTime) {
+    if (isWorkTime && !isFinished) {
         stopTimer();
         toggleMode();
     }
@@ -165,21 +201,25 @@ restLabel.addEventListener('click', () => {
 
 // シングルタップでタイマーの開始/一時停止
 currentPomodoroCount.addEventListener('click', () => {
-    const wasRunning = isTimerRunning; // 現在のタイマーの状態を保存
-    toggleTimer();
-    if (startTime === null) {
-        startTime = Date.now();
-    }
-    if (!wasRunning && isTimerRunning) { // 一時停止から再生に切り替わった場合
-        currentPomodoroCount.textContent = '▶️';
-        setTimeout(() => {
-            currentPomodoroCount.textContent = isWorkTime ? '🔥' : '☕️';
-            if (!isTimerRunning) {
-                currentPomodoroCount.textContent = '⏸️';
-            }
-        }, 1000);
-    } else { // 再生から一時停止、または初期状態の場合
-        currentPomodoroCount.textContent = isTimerRunning ? (isWorkTime ? '🔥' : '☕️') : '⏸️';
+    if (isFinished) {
+        resetAll();
+    } else {
+        const wasRunning = isTimerRunning; // 現在のタイマーの状態を保存
+        toggleTimer();
+        if (startTime === null) {
+            startTime = Date.now();
+        }
+        if (!wasRunning && isTimerRunning) { // 一時停止から再生に切り替わった場合
+            currentPomodoroCount.textContent = getModeIcon('play'); // 関数を使用
+            setTimeout(() => {
+                currentPomodoroCount.textContent = isWorkTime ? getModeIcon('work') : getModeIcon('rest'); // 関数を使用
+                if (!isTimerRunning) {
+                    currentPomodoroCount.textContent = getModeIcon('pause'); // 関数を使用
+                }
+            }, 1000);
+        } else { // 再生から一時停止、または初期状態の場合
+            currentPomodoroCount.textContent = isTimerRunning ? (isWorkTime ? getModeIcon('work') : getModeIcon('rest')) : getModeIcon('pause'); // 関数を使用
+        }
     }
 });
 
@@ -187,4 +227,4 @@ currentPomodoroCount.addEventListener('click', () => {
 updateToggleButtonState();
 updateDisplay();
 updateTotalSeparator();
-currentPomodoroCount.textContent = '▶️';
+currentPomodoroCount.textContent = getModeIcon('play');
