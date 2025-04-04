@@ -3,17 +3,13 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* 垂直方向の中央揃え */
-    min-height: 100vh; /* 画面の高さいっぱいにする */
-    margin: 0;
-    background-color: white;
-    color: black;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-body.dark-mode {
-    background-color: black;
-    color: white;
+    justify-content: flex-start;
+    min-height: 100vh;
+    width: 90vw;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 30px; /* ここで余白を追加 */
+    box-sizing: border-box;
 }
 
 #currentTimer {
@@ -70,11 +66,6 @@ body.dark-mode {
     font-weight: bold;
     color: black;
 }
-
-body.dark-mode .timer-label.active {
-    color: white;
-}
-
 .timer-row {
     display: flex;
     align-items: center;
@@ -84,21 +75,16 @@ body.dark-mode .timer-label.active {
 
 #workTimeDisplay,
 #restTimeDisplay {
-    font-size: 8em;
+    font-size: 5em;
     color: black;
-    min-width: 200px;
+    min-width: 100px;
     text-align: center;
 }
 
-body.dark-mode #workTimeDisplay,
-body.dark-mode #restTimeDisplay {
-    color: white;
-}
-
 #currentPomodoroCount {
-    font-size: 8em;
+    font-size: 5em;
     cursor: pointer;
-    padding: 0 0.5em;
+    padding: 0 0.3em;
 }
 
 #totalTimeDisplay {
@@ -118,26 +104,4 @@ body.dark-mode #restTimeDisplay {
     color: #555;
     margin-bottom: 5px;
     user-select: text;
-}
-
-body.dark-mode #historyContainer div {
-    color: #aaa;
-}
-
-#longPressIndicator {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-    user-select: none;
-    text-align: center;
-    line-height: 1;
-    font-size: 7em;
-    pointer-events: none;
-}
-
-#longPressIndicator.show {
-    opacity: 1;
 }
