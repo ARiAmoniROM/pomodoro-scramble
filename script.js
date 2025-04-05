@@ -9,6 +9,7 @@ const longPressIndicator = document.getElementById('longPressIndicator');
 const modeToggleButton = document.getElementById('modeToggleButton');
 const workLabel = document.getElementById('workLabel');
 const restLabel = document.getElementById('restLabel');
+const originalTitle = document.title;
 
 let startTime = null;
 let intervalId = null;
@@ -47,6 +48,16 @@ const getModeIcon = (iconType) => {
     }
 };
 
+const updateTitle = () => {
+    if (pomodoroCount === 0) {
+        document.title = originalTitle; // 0 ポモドーロ目の場合は元のタイトルを表示
+    } else {
+        const displayTime = isWorkTime ? formatTime(workTime) : formatTime(restTime);
+        const modeEmoji = isWorkTime ? getModeIcon('work') : getModeIcon('rest');
+        document.title = `${modeEmoji}${displayTime}`; // タイトルを更新
+    }
+};
+
 const updateDisplay = () => {
     const now = Date.now();
     const elapsed = now - startTime;
@@ -71,7 +82,9 @@ const updateDisplay = () => {
     restTimeDisplay.textContent = formatTime(restTime);
     currentPomodoroCount.textContent = isFinished ? getModeIcon('next') : currentSeparator; // 完了後は ⏭ を表示
     totalTimeDisplay.textContent = `${formatTime(totalWorkTime)} ${totalSeparator} ${formatTime(totalRestTime)}`;
+    document.title = `${isWorkTime ? getModeIcon('work') : getModeIcon('rest')} ${formatTime(isWorkTime ? workTime : restTime)}`;
     startTime = now;
+    updateTitle(); // タイトル更新関数を呼び出し
 };
 const startTimer = () => {
     if (!isTimerRunning && !isFinished) {
@@ -181,6 +194,10 @@ const updateTotalSeparator = () => {
 };
 
 modeToggleButton.addEventListener('click', () => {
+    if (pomodoroCount === 0) {
+        // 0 ポモドーロ目の場合は何もしない
+        return;
+    }
     stopTimer(); // 切り替え前にタイマーを停止
     toggleMode();
 });
@@ -227,4 +244,5 @@ currentPomodoroCount.addEventListener('click', () => {
 updateToggleButtonState();
 updateDisplay();
 updateTotalSeparator();
+updateTitle();
 currentPomodoroCount.textContent = getModeIcon('play');
