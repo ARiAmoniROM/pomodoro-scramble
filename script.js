@@ -27,7 +27,16 @@ const POMODORO_EMOJIS = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", 
 const MAX_POMODORO = 10; // ポモドーロ数の上限
 const PROGRESS_BAR_LENGTH = 10;
 
-const formatTime = ms => new Date(ms).toISOString().slice(14, 19);
+const formatTime = ms => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    const formattedMinutes = String(minutes).padStart(2, '0');
+    const formattedSeconds = String(seconds).padStart(2, '0');
+
+    return `${formattedMinutes}:${formattedSeconds}`;
+};
 
 const getModeIcon = (iconType) => {
     switch (iconType) {
