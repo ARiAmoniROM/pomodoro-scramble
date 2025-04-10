@@ -17,15 +17,18 @@
             <div class="timer-label rest-label" id="restLabel">rest</div>
         </div>
         <div class="timer-row">
-            <div id="workTimeDisplay">00:00</div>
+            <div id="workTimeDisplay"></div>
             <div id="currentPomodoroCount"></div>
-            <div id="restTimeDisplay">00:00</div>
+            <div id="restTimeDisplay"></div>
         </div>
-        <div id="totalTimeDisplay">00:00 0️⃣ 00:00</div>
+        <div id="totalTimeDisplay">
+            <span class="rest-time">00:00</span>
+            <span id="totalPomodoroCountEmoji">0️⃣</span>
+            <span class="work-time">00:00</span>
+        </div>
     </div>
     <div id="historyContainer">
-        <div></div>
-    </div>
+        </div>
     <script src="script.js"></script>
     <footer>
         <p><a href="https://github.com/ARiAmoniROM/pomodoro-scramble/blob/main/README.md" target="_blank" rel="noopener noreferrer">readme</a></p>

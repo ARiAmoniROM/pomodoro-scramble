@@ -68,23 +68,23 @@ body {
     font-weight: bold;
     color: black;
 }
+
 .timer-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
 }
 
 #workTimeDisplay,
 #restTimeDisplay {
-    font-size: 5em;
+    font-size: 6em;
     color: black;
     min-width: 100px;
     text-align: center;
 }
 
 #currentPomodoroCount {
-    font-size: 5em;
+    font-size: 6em;
     cursor: pointer;
     padding: 0 0.3em;
 }
@@ -94,11 +94,29 @@ body {
     color: gray;
     text-align: center;
     margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    white-space: nowrap; /* 折り返しを禁止 */
+}
+
+#totalTimeDisplay .rest-time,
+#totalTimeDisplay .work-time {
+    width: auto; /* 幅を自動調整 */
+    text-align: center;
+    white-space: nowrap; /* 折り返しを禁止 */
+}
+
+#totalTimeDisplay #totalPomodoroCountEmoji {
+    flex-shrink: 0;
+    white-space: nowrap; /* 折り返しを禁止 */
 }
 
 #historyContainer {
     margin-top: 40px;
     text-align: center;
+    width: 100%;
 }
 
 #historyContainer div {
@@ -106,6 +124,23 @@ body {
     color: #555;
     margin-bottom: 5px;
     user-select: text;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    white-space: nowrap; /* 折り返しを禁止 */
+}
+
+#historyContainer div .rest-time,
+#historyContainer div .work-time {
+    width: auto; /* 幅を自動調整 */
+    text-align: center;
+    white-space: nowrap; /* 折り返しを禁止 */
+}
+
+#historyContainer div .pomodoro-emoji {
+    flex-shrink: 0;
+    white-space: nowrap; /* 折り返しを禁止 */
 }
 
 footer {
@@ -123,4 +158,36 @@ footer a {
 
 footer a:hover {
     text-decoration: underline;
+}
+
+@media screen and (min-width: 800px) {
+    body {
+        transform-origin: top center; /* 縮小の中心を上部中央に設定 */
+    }
+}
+
+@media screen and (max-width: 799px) {
+    .timer-row {
+        flex-direction: column; /* 縦方向に配置 */
+        align-items: center; /* 中央揃え */
+    }
+
+    #workTimeDisplay {
+        position: static; /* 相対配置に戻す */
+        text-align: center;
+        margin-right: 0;
+        margin-bottom: 0.5em; /* 絵文字との間隔 */
+    }
+
+    #currentPomodoroCount {
+        position: static; /* 相対配置に戻す */
+        transform: none; /* 変形を解除 */
+        margin-bottom: 0.5em; /* 休憩時間との間隔 */
+    }
+
+    #restTimeDisplay {
+        position: static; /* 相対配置に戻す */
+        text-align: center;
+        margin-left: 0;
+    }
 }
