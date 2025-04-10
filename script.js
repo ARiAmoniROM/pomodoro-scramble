@@ -29,13 +29,15 @@ const PROGRESS_BAR_LENGTH = 10;
 
 const formatTime = ms => {
     const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
+    const minutes = Math.floor(totalSeconds / 60) % 60;
+    const hours = Math.floor(totalSeconds / 3600);
 
+    const formattedHours = String(hours).padStart(2, '0'); // hours を2桁でゼロ埋め
     const formattedMinutes = String(minutes).padStart(2, '0');
     const formattedSeconds = String(seconds).padStart(2, '0');
 
-    return `${formattedMinutes}:${formattedSeconds}`;
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`; // 常に HH:MM:SS 形式
 };
 
 const getModeIcon = (iconType) => {
@@ -199,7 +201,9 @@ const updateToggleButtonState = () => {
 
 const updateTotalSeparator = () => {
     totalSeparator = POMODORO_EMOJIS[pomodoroCount] || "";
-    totalTimeDisplay.textContent = `${formatTime(totalWorkTime)} ${totalSeparator} ${formatTime(totalRestTime)}`;
+    const totalWorkTimeFormatted = formatTime(totalWorkTime);
+    const totalRestTimeFormatted = formatTime(totalRestTime);
+    totalTimeDisplay.innerHTML = `<span>${totalWorkTimeFormatted}</span> <span>${totalSeparator}</span> <span>${totalRestTimeFormatted}</span>`;
 };
 
 modeToggleButton.addEventListener('click', () => {
