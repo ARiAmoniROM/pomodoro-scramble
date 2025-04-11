@@ -21,12 +21,12 @@ let pomodoroCount = 0;
 let history = [];
 let firstStart = true; // 最初のタイマー開始を判定するフラグ
 let isFinished = false; // おつかれさま処理が完了したかどうかを示すフラグ
-const POMODORO_EMOJIS = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+const POMODORO_EMOJIS = ["⏰️", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
 const MAX_POMODORO = 10; // ポモドーロ数の上限
 const PROGRESS_BAR_LENGTH = 10;
 
 const formatTime = (ms) => {
-    const totalSeconds = Math.floor(ms / 1000);
+    const totalSeconds = Math.floor(ms / 1);
     const seconds = totalSeconds % 60;
     const minutes = Math.floor(totalSeconds / 60) % 60;
     const hours = Math.floor(totalSeconds / 3600);
@@ -156,18 +156,24 @@ const toggleTimer = () => {
 };
 
 const toggleMode = (manual = true) => {
-    if (manual && !isFinished) {
+    if (manual) {
         currentPomodoroCount.textContent = getModeIcon('loading'); // 関数を使用
         setTimeout(() => {
-            if (isWorkTime) { // 作業から休憩に移る時
-                if (pomodoroCount === MAX_POMODORO) {
+            if (isWorkTime && pomodoroCount === MAX_POMODORO && !isFinished) {
                     stopTimer();
                     alert("Well done."); // ポップアップ表示 (より穏やかな表現に変更)
                     isFinished = true; // 完了フラグを立てる
                     currentPomodoroCount.textContent = getModeIcon('next'); // 関数を使用
-                }
-            } else { // 休憩から作業に戻る時
-                if (pomodoroCount < MAX_POMODORO) {
+                    // 10回目の作業時間と0の休憩時間を履歴に追加
+                    const format = getFormat(workTime, 0);
+                    history.push({
+                        work: formatDisplay(formatTime(workTime), format),
+                        rest: formatDisplay(formatTime(0), format),
+                        count: POMODORO_EMOJIS[pomodoroCount] || ""
+                    });
+                    renderHistory();
+                    updateTotalSeparator(); // 総計表示を更新
+            } else if (!isWorkTime && pomodoroCount < MAX_POMODORO) {
                     const format = getFormat(workTime, restTime);
                     history.push({
                         work: formatDisplay(formatTime(workTime), format),
@@ -179,7 +185,6 @@ const toggleMode = (manual = true) => {
                     restTime = 0;
                     pomodoroCount++;
                     updateTotalSeparator();
-                }
             }
             isWorkTime = !isWorkTime;
             updateToggleButtonState();
@@ -244,7 +249,7 @@ const updateToggleButtonState = () => {
 };
 
 const updateTotalSeparator = () => {
-    totalSeparator = POMODORO_EMOJIS[pomodoroCount] || "";
+    totalSeparator = isFinished ? ' ⏰️ ' : (POMODORO_EMOJIS[pomodoroCount] || "");
     const format = getFormat(totalWorkTime, totalRestTime);
     const totalWorkTimeFormatted = formatDisplay(formatTime(totalWorkTime), format);
     const totalRestTimeFormatted = formatDisplay(formatTime(totalRestTime), format);
