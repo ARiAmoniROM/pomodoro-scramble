@@ -4,8 +4,6 @@ const currentPomodoroCount = document.getElementById('currentPomodoroCount');
 const totalTimeDisplay = document.getElementById('totalTimeDisplay');
 const historyContainer = document.getElementById('historyContainer');
 const body = document.body;
-const feedbackIcon = document.getElementById('feedbackIcon');
-const longPressIndicator = document.getElementById('longPressIndicator');
 const modeToggleButton = document.getElementById('modeToggleButton');
 const workLabel = document.getElementById('workLabel');
 const restLabel = document.getElementById('restLabel');
@@ -27,17 +25,44 @@ const POMODORO_EMOJIS = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", 
 const MAX_POMODORO = 10; // ポモドーロ数の上限
 const PROGRESS_BAR_LENGTH = 10;
 
-const formatTime = ms => {
+const formatTime = (ms) => {
     const totalSeconds = Math.floor(ms / 1000);
     const seconds = totalSeconds % 60;
     const minutes = Math.floor(totalSeconds / 60) % 60;
     const hours = Math.floor(totalSeconds / 3600);
 
-    const formattedHours = String(hours).padStart(2, '0'); // hours を2桁でゼロ埋め
-    const formattedMinutes = String(minutes).padStart(2, '0');
     const formattedSeconds = String(seconds).padStart(2, '0');
+    const formattedMinutes = String(minutes).padStart(2, '0');
+    const formattedHours = String(hours);
 
-    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`; // 常に HH:MM:SS 形式
+    return { hours, minutes, seconds, formattedHours, formattedMinutes, formattedSeconds };
+};
+
+const formatDisplay = (timeObj, format) => {
+    switch (format) {
+        case 'HH:MM:SS':
+            return `${timeObj.formattedHours.padStart(2, '0')}:${timeObj.formattedMinutes.padStart(2, '0')}:${timeObj.formattedSeconds.padStart(2, '0')}`;
+        case 'H:MM:SS':
+            return `${timeObj.hours}:${timeObj.formattedMinutes}:${timeObj.formattedSeconds}`;
+        case 'MM:SS':
+            return `${timeObj.formattedMinutes}:${timeObj.formattedSeconds}`;
+        default:
+            return '';
+    }
+};
+
+const getFormat = (ms1, ms2) => {
+    const time1 = formatTime(ms1);
+    const time2 = formatTime(ms2);
+    const maxHours = Math.max(time1.hours, time2.hours);
+
+    if (maxHours >= 10) {
+        return 'HH:MM:SS';
+    } else if (maxHours >= 1) {
+        return 'H:MM:SS';
+    } else {
+        return 'MM:SS';
+    }
 };
 
 const getModeIcon = (iconType) => {
@@ -63,9 +88,13 @@ const updateTitle = () => {
     if (pomodoroCount === 0) {
         document.title = originalTitle; // 0 ポモドーロ目の場合は元のタイトルを表示
     } else {
-        const displayTime = isWorkTime ? formatTime(workTime) : formatTime(restTime);
+        const currentTime = isWorkTime ? workTime : restTime;
+        const formattedCurrentTime = formatDisplay(
+            formatTime(currentTime),
+            currentTime >= 36000000 ? 'HH:MM:SS' : (currentTime >= 3600000 ? 'H:MM:SS' : 'MM:SS')
+        );
         const modeEmoji = isWorkTime ? getModeIcon('work') : getModeIcon('rest');
-        document.title = `${modeEmoji}${displayTime}`; // タイトルを更新
+        document.title = `${modeEmoji}${formattedCurrentTime}`; // タイトルを更新
     }
 };
 
@@ -89,14 +118,15 @@ const updateDisplay = () => {
         totalRestTime += elapsed;
     }
 
-    workTimeDisplay.textContent = formatTime(workTime);
-    restTimeDisplay.textContent = formatTime(restTime);
+    const format = getFormat(workTime, restTime);
+    workTimeDisplay.textContent = formatDisplay(formatTime(workTime), format);
+    restTimeDisplay.textContent = formatDisplay(formatTime(restTime), format);
     currentPomodoroCount.textContent = isFinished ? getModeIcon('next') : currentSeparator; // 完了後は ⏭ を表示
-    totalTimeDisplay.textContent = `${formatTime(totalWorkTime)} ${totalSeparator} ${formatTime(totalRestTime)}`;
-    document.title = `${isWorkTime ? getModeIcon('work') : getModeIcon('rest')} ${formatTime(isWorkTime ? workTime : restTime)}`;
+    updateTotalSeparator();
     startTime = now;
     updateTitle(); // タイトル更新関数を呼び出し
 };
+
 const startTimer = () => {
     if (!isTimerRunning && !isFinished) {
         startTime = Date.now();
@@ -109,6 +139,7 @@ const startTimer = () => {
         }
     }
 };
+
 const stopTimer = () => {
     if (isTimerRunning) {
         clearInterval(intervalId);
@@ -117,11 +148,13 @@ const stopTimer = () => {
         updateDisplay();
     }
 };
+
 const toggleTimer = () => {
     if (!isFinished) {
         isTimerRunning ? stopTimer() : startTimer();
     }
 };
+
 const toggleMode = (manual = true) => {
     if (manual && !isFinished) {
         currentPomodoroCount.textContent = getModeIcon('loading'); // 関数を使用
@@ -135,7 +168,12 @@ const toggleMode = (manual = true) => {
                 }
             } else { // 休憩から作業に戻る時
                 if (pomodoroCount < MAX_POMODORO) {
-                    history.push({ work: formatTime(workTime), rest: formatTime(restTime), count: POMODORO_EMOJIS[pomodoroCount] || "" });
+                    const format = getFormat(workTime, restTime);
+                    history.push({
+                        work: formatDisplay(formatTime(workTime), format),
+                        rest: formatDisplay(formatTime(restTime), format),
+                        count: POMODORO_EMOJIS[pomodoroCount] || ""
+                    });
                     renderHistory();
                     workTime = 0;
                     restTime = 0;
@@ -153,14 +191,20 @@ const toggleMode = (manual = true) => {
         startTimer(); // モード切り替え時に自動で開始
     }
 };
+
 const renderHistory = () => {
     historyContainer.innerHTML = '';
     history.slice().reverse().forEach(item => {
         const logItem = document.createElement('div');
-        logItem.textContent = `${item.work} ${item.count} ${item.rest}`;
+        logItem.innerHTML = `
+            <span class="work-time">${item.work}</span>
+            <span class="pomodoro-emoji">${item.count}</span>
+            <span class="rest-time">${item.rest}</span>
+        `;
         historyContainer.appendChild(logItem);
     });
 };
+
 const resetAll = () => {
     stopTimer();
     workTime = 0;
@@ -201,9 +245,14 @@ const updateToggleButtonState = () => {
 
 const updateTotalSeparator = () => {
     totalSeparator = POMODORO_EMOJIS[pomodoroCount] || "";
-    const totalWorkTimeFormatted = formatTime(totalWorkTime);
-    const totalRestTimeFormatted = formatTime(totalRestTime);
-    totalTimeDisplay.innerHTML = `<span>${totalWorkTimeFormatted}</span> <span>${totalSeparator}</span> <span>${totalRestTimeFormatted}</span>`;
+    const format = getFormat(totalWorkTime, totalRestTime);
+    const totalWorkTimeFormatted = formatDisplay(formatTime(totalWorkTime), format);
+    const totalRestTimeFormatted = formatDisplay(formatTime(totalRestTime), format);
+    totalTimeDisplay.innerHTML = `
+        <span class="work-time">${totalWorkTimeFormatted}</span>
+        <span class="pomodoro-emoji">${totalSeparator}</span>
+        <span class="rest-time">${totalRestTimeFormatted}</span>
+    `;
 };
 
 modeToggleButton.addEventListener('click', () => {
@@ -248,7 +297,9 @@ currentPomodoroCount.addEventListener('click', () => {
                 }
             }, 1000);
         } else { // 再生から一時停止、または初期状態の場合
-            currentPomodoroCount.textContent = isTimerRunning ? (isWorkTime ? getModeIcon('work') : getModeIcon('rest')) : getModeIcon('pause'); // 関数を使用
+            currentPomodoroCount.textContent = isTimerRunning ?
+                (isWorkTime ? getModeIcon('work') : getModeIcon('rest')) :
+                getModeIcon('pause'); // 関数を使用
         }
     }
 });
