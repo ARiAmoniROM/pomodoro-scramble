@@ -8,27 +8,19 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="currentTimer">
-        <div class="label-row">
-            <div class="timer-label work-label active" id="workLabel">work</div>
-            <button id="modeToggleButton" class="toggle-button">
-                <div class="toggle-slider"></div>
-            </button>
-            <div class="timer-label rest-label" id="restLabel">rest</div>
+    <div class="timer-controls">
+        <div class="total-time-display">
+            <span id="work" class="time">🍅</span>
+            <span id="toggle" class="mode-toggle">🔄</span>
+            <span id="rest" class="time">🫠</span>
         </div>
-        <div class="timer-row">
-            <div id="workTimeDisplay"></div>
-            <div id="currentPomodoroCount"></div>
-            <div id="restTimeDisplay"></div>
+        <div class="current-pomodoro-display">
+            <span id="currentWorkTime" class="time current">00:00</span>
+            <span id="currentPomodoroCount">▶️</span>
+            <span id="currentRestTime" class="time current">00:00</span>
         </div>
-        <div id="totalTimeDisplay">
-            <span class="rest-time">00:00</span>
-            <span id="totalPomodoroCountEmoji">0️⃣</span>
-            <span class="work-time">00:00</span>
-        </div>
+        <div id="historyContainer" class="history"></div>
     </div>
-    <div id="historyContainer">
-        </div>
     <script src="script.js"></script>
     <footer>
         <p><a href="https://github.com/ARiAmoniROM/pomodoro-scramble/blob/main/README.md" target="_blank" rel="noopener noreferrer">readme</a></p>
