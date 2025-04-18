@@ -239,20 +239,6 @@ toggleSpan.addEventListener('click', () => {
     toggleMode();
 });
 
-workDisplay.addEventListener('click', () => {
-    if (!isWorkTime && !isFinished) {
-        stopTimer();
-        toggleMode();
-    }
-});
-
-restDisplay.addEventListener('click', () => {
-    if (isWorkTime && !isFinished) {
-        stopTimer();
-        toggleMode();
-    }
-});
-
 currentPomodoroCount.addEventListener('click', () => {
     toggleTimer();
 });
